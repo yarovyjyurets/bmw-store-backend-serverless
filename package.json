@@ -1,0 +1,11 @@
+{
+  "name": "bmw-store-backend-serverless",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "sls:deploy:product-service": "cd product-service && sls deploy && cd ../.."
+  },
+  "author": "",
+  "license": "ISC"
+}
