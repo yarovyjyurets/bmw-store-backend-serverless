@@ -1,18 +1,13 @@
-import type { ValidatedEventAPIGatewayProxyEvent } from "@libs/api-gateway";
-import { formatJSONResponse } from "@libs/api-gateway";
+import { getSuccessResponse } from "@libs/api-gateway";
 import { middyfy } from "@libs/lambda";
+import * as productServiceAPI from "@services/product-service";
+import { APIGatewayProxyResult } from "aws-lambda";
 
-import schema from "./schema";
+const buildHandler =
+  ({ productService = productServiceAPI } = {}) =>
+  async (): Promise<APIGatewayProxyResult> => {
+    const products = await productService.getProductsList();
+    return getSuccessResponse({ response: products });
+  };
 
-const getProductsList: ValidatedEventAPIGatewayProxyEvent<
-  typeof schema
-> = async (event) => {
-  return formatJSONResponse({
-    message: `Hello ${
-      event.queryStringParameters?.name || "Unknown"
-    }, welcome to the exciting Serverless world!`,
-    event,
-  });
-};
-
-export const main = middyfy(getProductsList);
+export const main = middyfy(buildHandler());

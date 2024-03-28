@@ -28,6 +28,9 @@
   "queryStringParameters": {
     "name": "Yurets"
   },
+  "pathParameters": {
+    "productId": "7567ec4b-b10c-48c5-9345-fc73c48a80a1"
+  },
   "requestContext": {
     "accountId": "992382555667",
     "apiId": "j08ed2g98i",

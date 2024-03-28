@@ -1,11 +1,15 @@
 import type { AWS } from "@serverless/typescript";
 
-import hello from "@functions/hello";
+import { getProductsList, getProductsById } from "@functions";
 
 const serverlessConfiguration: AWS = {
   service: "product-service",
   frameworkVersion: "3",
-  plugins: ["serverless-esbuild"],
+  plugins: [
+    "serverless-auto-swagger",
+    "serverless-esbuild",
+    "serverless-offline",
+  ],
   provider: {
     name: "aws",
     runtime: "nodejs20.x",
@@ -20,10 +24,36 @@ const serverlessConfiguration: AWS = {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1",
       NODE_OPTIONS: "--enable-source-maps --stack-trace-limit=1000",
     },
+    httpApi: {
+      cors: true,
+    },
   },
   // import the function via paths
   functions: {
-    hello,
+    getProductsList: {
+      ...getProductsList,
+      name: "${sls:stage}-getProductsList",
+      events: [
+        {
+          httpApi: {
+            method: "GET",
+            path: "/${sls:stage}/products",
+          },
+        },
+      ],
+    },
+    getProductsById: {
+      ...getProductsById,
+      name: "${sls:stage}-getProductsById",
+      events: [
+        {
+          httpApi: {
+            method: "GET",
+            path: "/${sls:stage}/products/{productId}",
+          },
+        },
+      ],
+    },
   },
   package: { individually: true },
   custom: {

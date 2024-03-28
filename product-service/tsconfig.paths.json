@@ -3,6 +3,8 @@
     "baseUrl": ".",
     "paths": {
       "@functions/*": ["src/functions/*"],
+      "@services/*": ["src/services/*"],
+      "@functions": ["src/functions/index.ts"],
       "@libs/*": ["src/libs/*"]
     }
   }
