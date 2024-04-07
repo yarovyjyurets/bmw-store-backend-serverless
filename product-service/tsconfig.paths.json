@@ -5,7 +5,8 @@
       "@functions/*": ["src/functions/*"],
       "@services/*": ["src/services/*"],
       "@functions": ["src/functions/index.ts"],
-      "@libs/*": ["src/libs/*"]
+      "@libs/*": ["src/libs/*"],
+      "@shared/*": ["src/shared/*"],
     }
   }
 }

@@ -4,14 +4,19 @@
   "description": "Serverless aws-nodejs-typescript template",
   "main": "serverless.ts",
   "scripts": {
+    "seed:product": "ts-node src/scripts/seed.product.ts",
+    "seed:stock": "ts-node src/scripts/seed.stock.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "engines": {
     "node": ">=14.15.0"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.549.0",
+    "@aws-sdk/util-dynamodb": "^3.549.0",
     "@middy/core": "^3.4.0",
-    "@middy/http-json-body-parser": "^3.4.0"
+    "@middy/http-json-body-parser": "^3.4.0",
+    "serverless-dynamodb-local": "^0.2.40"
   },
   "devDependencies": {
     "@serverless/typescript": "^3.0.0",
@@ -22,8 +27,9 @@
     "serverless": "^3.0.0",
     "serverless-auto-swagger": "^2.12.0",
     "serverless-esbuild": "^1.23.3",
+    "serverless-iam-roles-per-function": "^3.2.0",
     "serverless-offline": "^13.3.3",
-    "ts-node": "^10.4.0",
+    "ts-node": "^10.9.2",
     "tsconfig-paths": "^3.9.0",
     "typescript": "^4.1.3"
   },

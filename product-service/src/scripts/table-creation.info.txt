@@ -1,0 +1,33 @@
+### Product model:
+
+```
+aws dynamodb create-table \
+    --table-name Product \
+    --attribute-definitions \
+        AttributeName=id,AttributeType=S \
+        AttributeName=title,AttributeType=S \
+    --key-schema \
+        AttributeName=id,KeyType=HASH \
+        AttributeName=title,KeyType=RANGE \
+    --provisioned-throughput \
+        ReadCapacityUnits=5,WriteCapacityUnits=5 \
+    --table-class STANDARD \
+    --profile yurets \
+    --region eu-central-1
+```
+
+### Stock model:
+
+```
+aws dynamodb create-table \
+    --table-name Stock \
+    --attribute-definitions \
+        AttributeName=product_id,AttributeType=S \
+    --key-schema \
+        AttributeName=product_id,KeyType=HASH \
+    --provisioned-throughput \
+        ReadCapacityUnits=5,WriteCapacityUnits=5 \
+    --table-class STANDARD \
+    --profile yurets \
+    --region eu-central-1
+```
