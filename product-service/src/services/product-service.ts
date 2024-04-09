@@ -1,10 +1,11 @@
-import { products } from "@functions/getProductsList/mocks";
 import {
   DynamoDBClient,
   GetItemCommand,
   ScanCommand,
+  TransactWriteItemsCommand,
 } from "@aws-sdk/client-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
+import { Product } from "@shared/types";
 
 // CONSTANTS
 const TABLE_NAME_PRODUCT = process.env.TABLE_NAME_PRODUCT;
@@ -57,4 +58,47 @@ export const getProductById = async (id) => {
   }
 
   return retrieveStockAndMerge(unmarshall(Item));
+};
+
+export const createProduct = async (product: Product) => {
+  console.dir(
+    { product, createProduct: "createProduct" },
+    { colors: true, depth: 10 }
+  );
+  const transaction = new TransactWriteItemsCommand({
+    TransactItems: [
+      {
+        Put: {
+          TableName: TABLE_NAME_PRODUCT,
+          Item: {
+            id: {
+              S: product.id,
+            },
+            title: {
+              S: product.title,
+            },
+            description: {
+              S: product.description,
+            },
+            price: {
+              N: product.price.toString(),
+            },
+          },
+        },
+      },
+      {
+        Put: {
+          TableName: TABLE_NAME_STOCK,
+          Item: {
+            product_id: { S: product.id },
+            count: { N: product.count.toString() },
+          },
+        },
+      },
+    ],
+  });
+
+  const res = await dynamoDb.send(transaction);
+  console.log(res);
+  return "Product created successfully!";
 };
