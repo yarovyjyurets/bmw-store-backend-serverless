@@ -1,6 +1,6 @@
 import type { AWS } from "@serverless/typescript";
 
-import { importProductsFile } from "@functions";
+import { importProductsFile, importFileParser } from "@functions";
 
 const serverlessConfiguration: AWS = {
   service: "import-service",
@@ -41,6 +41,21 @@ const serverlessConfiguration: AWS = {
         },
       ],
     },
+    importFileParser: {
+      ...importFileParser,
+      name: "${sls:stage}-importFileParser",
+      role: "ImportFileParserLambdaRole",
+      events: [
+        {
+          s3: {
+            bucket: "bmw-store-bucket",
+            event: "s3:ObjectCreated:*",
+            rules: [{ prefix: "uploaded/" }],
+            existing: true,
+          },
+        },
+      ],
+    },
   },
   package: { individually: true },
   custom: {
@@ -53,6 +68,10 @@ const serverlessConfiguration: AWS = {
       define: { "require.resolve": undefined },
       platform: "node",
       concurrency: 10,
+    },
+    "serverless-offline": {
+      httpPort: 3001,
+      printOutput: true,
     },
   },
   resources: {
@@ -98,12 +117,7 @@ const serverlessConfiguration: AWS = {
                   {
                     Sid: "S3Access",
                     Effect: "Allow",
-                    Action: [
-                      "s3:PutObject",
-                      "s3:PutObjectAcl",
-                      "s3:GetObject",
-                      "s3:ListBucket",
-                    ],
+                    Action: ["s3:PutObject", "s3:ListBucket"],
                     Resource: "arn:aws:s3:::bmw-store-bucket/*",
                   },
                 ],
@@ -111,6 +125,61 @@ const serverlessConfiguration: AWS = {
             },
             {
               PolicyName: "ImportProductsFileLambdaLogsPolicy",
+              PolicyDocument: {
+                Version: "2012-10-17",
+                Statement: [
+                  {
+                    Effect: "Allow",
+                    Action: [
+                      "logs:CreateLogGroup",
+                      "logs:CreateLogStream",
+                      "logs:PutLogEvents",
+                    ],
+                    Resource: "arn:aws:logs:*:*:*",
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+      ImportFileParserLambdaRole: {
+        Type: "AWS::IAM::Role",
+        Properties: {
+          RoleName: "ImportFileParserLambdaRole",
+          AssumeRolePolicyDocument: {
+            Version: "2012-10-17",
+            Statement: [
+              {
+                Effect: "Allow",
+                Principal: {
+                  Service: "lambda.amazonaws.com",
+                },
+                Action: "sts:AssumeRole",
+              },
+            ],
+          },
+          Policies: [
+            {
+              PolicyName: "ImportFileParserLambdaPolicy",
+              PolicyDocument: {
+                Version: "2012-10-17",
+                Statement: [
+                  {
+                    Sid: "S3Access",
+                    Effect: "Allow",
+                    Action: [
+                      "s3:GetObject",
+                      "s3:DeleteObject",
+                      "s3:CopyObject",
+                    ],
+                    Resource: "arn:aws:s3:::bmw-store-bucket/*",
+                  },
+                ],
+              },
+            },
+            {
+              PolicyName: "ImportFileParserLambdaLogsPolicy",
               PolicyDocument: {
                 Version: "2012-10-17",
                 Statement: [
