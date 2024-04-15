@@ -1,16 +1,19 @@
-import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
-import { S3Event, S3EventRecord } from "aws-lambda";
+import {
+  S3Client,
+  GetObjectCommand,
+  DeleteObjectCommand,
+} from "@aws-sdk/client-s3";
+import { S3Event } from "aws-lambda";
+import { Readable } from "stream";
 const csv = require("csv-parser");
+import { CopyObjectCommand } from "@aws-sdk/client-s3";
+import * as path from "path";
 
-const BMW_STORE_BUCKET_NAME = process.env.BMW_STORE_BUCKET_NAME;
-const FOLDER_PREFIX = "uploaded";
 const REGION = "eu-central-1";
 
 const s3Client = new S3Client({ region: REGION });
 
 export const main = async (event: S3Event): Promise<void> => {
-  console.log(event.Records[0].s3.object.key);
-  console.log(event.Records[0].s3.bucket.name);
   const bucketName = event.Records[0].s3.bucket.name;
   const key = event.Records[0].s3.object.key;
   console.log({ bucketName, key });
@@ -19,9 +22,27 @@ export const main = async (event: S3Event): Promise<void> => {
     const { Body } = await s3Client.send(
       new GetObjectCommand({ Bucket: bucketName, Key: key })
     );
-    Body.pipe(csv()).on("data", (data) => {
+
+    for await (const data of Readable.from(Body.pipe(csv()))) {
       console.log(data);
-    });
+    }
+    console.log("File parsed");
+
+    const fileName = path.basename(key);
+    const destinationKey = `parsed/${fileName}`;
+    await s3Client.send(
+      new CopyObjectCommand({
+        Bucket: bucketName,
+        CopySource: `/${bucketName}/${key}`,
+        Key: destinationKey,
+      })
+    );
+    console.log(`File copied to 'parsed' folder with key: ${destinationKey}`);
+
+    await s3Client.send(
+      new DeleteObjectCommand({ Bucket: bucketName, Key: key })
+    );
+    console.log("Original file removed");
   } catch (error) {
     console.error("Error:", error);
   }
