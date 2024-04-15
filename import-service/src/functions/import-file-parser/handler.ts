@@ -2,11 +2,11 @@ import {
   S3Client,
   GetObjectCommand,
   DeleteObjectCommand,
+  CopyObjectCommand,
 } from "@aws-sdk/client-s3";
 import { S3Event } from "aws-lambda";
 import { Readable } from "stream";
 const csv = require("csv-parser");
-import { CopyObjectCommand } from "@aws-sdk/client-s3";
 import * as path from "path";
 
 const REGION = "eu-central-1";
