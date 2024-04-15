@@ -30,10 +30,11 @@ export const main = async (event: S3Event): Promise<void> => {
 
     const fileName = path.basename(key);
     const destinationKey = `parsed/${fileName}`;
+    console.log({ destinationKey, copySource: `${bucketName}/${key}` });
     await s3Client.send(
       new CopyObjectCommand({
         Bucket: bucketName,
-        CopySource: `/${bucketName}/${key}`,
+        CopySource: `${bucketName}/${key}`,
         Key: destinationKey,
       })
     );

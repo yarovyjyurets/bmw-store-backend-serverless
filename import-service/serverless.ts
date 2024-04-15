@@ -171,7 +171,10 @@ const serverlessConfiguration: AWS = {
                     Action: [
                       "s3:GetObject",
                       "s3:DeleteObject",
+                      "s3:GetObjectTagging",
                       "s3:CopyObject",
+                      "s3:PutObjectTagging",
+                      "s3:PutObject",
                     ],
                     Resource: "arn:aws:s3:::bmw-store-bucket/*",
                   },
