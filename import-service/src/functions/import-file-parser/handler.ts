@@ -8,10 +8,13 @@ import { S3Event } from "aws-lambda";
 import { Readable } from "stream";
 const csv = require("csv-parser");
 import * as path from "path";
+import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 
 const REGION = "eu-central-1";
 
 const s3Client = new S3Client({ region: REGION });
+const sqsClient = new SQSClient({ region: REGION });
+const queueUrl = process.env.SQS_URL;
 
 export const main = async (event: S3Event): Promise<void> => {
   const bucketName = event.Records[0].s3.bucket.name;
@@ -24,9 +27,22 @@ export const main = async (event: S3Event): Promise<void> => {
     );
 
     for await (const data of Readable.from(Body.pipe(csv()))) {
-      console.log(data);
+      const product = JSON.stringify({
+        title: data.Title,
+        description: data.Description,
+        price: data.Price,
+        count: data.Count,
+      });
+
+      await sqsClient.send(
+        new SendMessageCommand({
+          QueueUrl: queueUrl,
+          MessageBody: product,
+        })
+      );
+      console.log("Product sent to SQS:", product);
     }
-    console.log("File parsed");
+    console.log("File processed");
 
     const fileName = path.basename(key);
     const destinationKey = `parsed/${fileName}`;

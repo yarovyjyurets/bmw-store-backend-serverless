@@ -22,6 +22,7 @@ const serverlessConfiguration: AWS = {
       NODE_OPTIONS: "--enable-source-maps --stack-trace-limit=1000",
       BMW_STORE_BUCKET_NAME:
         "${self:resources.Resources.bmwStoreS3Bucket.Properties.BucketName}",
+      SQS_URL: "${param:SQSQueueUrl}",
     },
     httpApi: {
       cors: true,
@@ -194,6 +195,19 @@ const serverlessConfiguration: AWS = {
                       "logs:PutLogEvents",
                     ],
                     Resource: "arn:aws:logs:*:*:*",
+                  },
+                ],
+              },
+            },
+            {
+              PolicyName: "SQSPolicy",
+              PolicyDocument: {
+                Version: "2012-10-17",
+                Statement: [
+                  {
+                    Effect: "Allow",
+                    Action: ["sqs:SendMessage"],
+                    Resource: "${param:SQSQueueArn}",
                   },
                 ],
               },
