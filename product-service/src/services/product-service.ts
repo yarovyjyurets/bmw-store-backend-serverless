@@ -6,6 +6,7 @@ import {
 } from "@aws-sdk/client-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 import { Product } from "@shared/types";
+import { v4 as uuidv4 } from "uuid";
 
 // CONSTANTS
 const TABLE_NAME_PRODUCT = process.env.TABLE_NAME_PRODUCT;
@@ -61,10 +62,7 @@ export const getProductById = async (id) => {
 };
 
 export const createProduct = async (product: Product) => {
-  console.dir(
-    { product, createProduct: "createProduct" },
-    { colors: true, depth: 10 }
-  );
+  const productId = product.id || uuidv4();
   const transaction = new TransactWriteItemsCommand({
     TransactItems: [
       {
@@ -72,16 +70,16 @@ export const createProduct = async (product: Product) => {
           TableName: TABLE_NAME_PRODUCT,
           Item: {
             id: {
-              S: product.id,
+              S: productId,
             },
             title: {
               S: product.title,
             },
             description: {
-              S: product.description,
+              S: product.description || "UNKNOWN",
             },
             price: {
-              N: product.price.toString(),
+              N: (product.price || 0).toString(),
             },
           },
         },
@@ -90,15 +88,13 @@ export const createProduct = async (product: Product) => {
         Put: {
           TableName: TABLE_NAME_STOCK,
           Item: {
-            product_id: { S: product.id },
+            product_id: { S: productId },
             count: { N: product.count.toString() },
           },
         },
       },
     ],
   });
-
-  const res = await dynamoDb.send(transaction);
-  console.log(res);
+  await dynamoDb.send(transaction);
   return "Product created successfully!";
 };

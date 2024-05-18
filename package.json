@@ -7,5 +7,16 @@
     "sls:deploy:product-service": "cd product-service && sls deploy && cd ../.."
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/client-sns": "^3.556.0",
+    "@serverless/typescript": "^3.38.0",
+    "serverless": "^3.38.0",
+    "serverless-offline": "^13.3.4",
+    "serverless-plugin-typescript": "^2.1.5"
+  },
+  "devDependencies": {
+    "@serverless/compose": "^1.3.0",
+    "ts-node": "^10.9.2"
+  }
 }
