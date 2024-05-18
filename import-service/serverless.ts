@@ -26,6 +26,13 @@ const serverlessConfiguration: AWS = {
     },
     httpApi: {
       cors: true,
+      authorizers: {
+        basicAuthorizer: {
+          type: "request",
+          identitySource: ["$request.header.Authorization"],
+          functionArn: "${param:AuthFunctionArn}",
+        },
+      },
     },
   },
   functions: {
@@ -38,6 +45,9 @@ const serverlessConfiguration: AWS = {
           httpApi: {
             method: "get",
             path: "/import",
+            authorizer: {
+              name: "basicAuthorizer",
+            },
           },
         },
       ],
